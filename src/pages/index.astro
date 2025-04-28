@@ -1,10 +1,22 @@
 ---
+import Slider from '@/components/Slider.astro';
 import Layout from '@/layouts/Layout.astro';
 ---
 
 <Layout>
-  <h1>TOPページ</h1>
+  <div class="container">
+    <Slider />
+    <div class="liquid-canvas"></div>
+  </div>
 </Layout>
 
 <style lang="scss">
+  .container {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+  }
 </style>
+
+<script src="../scripts/index.js"></script>
