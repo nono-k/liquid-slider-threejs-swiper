@@ -2,7 +2,7 @@ import { LiquidSlider } from './liquidSlider';
 
 window.addEventListener('DOMContentLoaded', () => {
   const container = document.querySelector('.liquid-canvas');
-  const baseUrl = 'liquid-slider-threejs-swiper';
+  const baseUrl = '/liquid-slider-threejs-swiper';
 
   const slider = new LiquidSlider({
     container: container,
