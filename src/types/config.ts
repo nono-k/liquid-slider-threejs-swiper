@@ -7,8 +7,3 @@ export type SiteConfig = {
   siteIcon: string;
   siteImg: string;
 };
-
-export type HeaderLink = {
-  name: string;
-  url: string;
-};

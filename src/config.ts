@@ -1,4 +1,4 @@
-import type { HeaderLink, SiteConfig } from '@/types/config';
+import type { SiteConfig } from '@/types/config';
 
 export const siteConfig: SiteConfig = {
   siteTitle: 'My Site',
@@ -9,9 +9,3 @@ export const siteConfig: SiteConfig = {
   siteIcon: '/favicon.svg',
   siteImg: '/ogp.png',
 };
-
-export const headerLink: HeaderLink[] = [
-  { name: 'Home', url: '/' },
-  { name: 'About', url: '/about' },
-  { name: 'Contact', url: '/contact' },
-];
