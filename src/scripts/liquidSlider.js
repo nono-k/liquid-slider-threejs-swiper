@@ -53,7 +53,15 @@ export class LiquidSlider {
       },
       on: {
         slideChangeTransitionStart: slider => {
-          this.nextSlide(slider.realIndex);
+          const newIndex = slider.realIndex;
+          const total = this.textures.length;
+
+          const diff = newIndex - this.currentIndex;
+          const forward = (diff > 0 && diff < total / 2) || diff < -total / 2;
+
+          this.uniforms.uEffect.value = forward ? -1 : 1;
+
+          this.nextSlide(newIndex);
         },
       },
     });
