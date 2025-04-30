@@ -42,7 +42,7 @@ export class LiquidSlider {
       modules: [Navigation, Autoplay],
       slidesPerView: 1,
       loop: true,
-      speed: 1000,
+      speed: 2150,
       navigation: {
         nextEl: '.swiper-button-next',
         prevEl: '.swiper-button-prev',
@@ -59,7 +59,7 @@ export class LiquidSlider {
           const diff = newIndex - this.currentIndex;
           const forward = (diff > 0 && diff < total / 2) || diff < -total / 2;
 
-          this.uniforms.uEffect.value = forward ? -1 : 1;
+          this.uniforms.uEffect.value = forward ? -0.1 : 0.1;
 
           this.nextSlide(newIndex);
         },
@@ -80,13 +80,17 @@ export class LiquidSlider {
   }
 
   createMesh() {
+    const texture1 = this.textures[this.currentIndex];
+    const texture2 =
+      this.textures[(this.currentIndex + 1) % this.textures.length];
+
+    const { planeWidth, planeHeight } = this.getCoverSize(texture1);
+
     this.uniforms = {
       uProgress: { value: 0 },
-      uEffect: { value: -1 },
-      uTexture1: { value: this.textures[this.currentIndex] },
-      uTexture2: {
-        value: this.textures[(this.currentIndex + 1) % this.textures.length],
-      },
+      uEffect: { value: -0.1 },
+      uTexture1: { value: texture1 },
+      uTexture2: { value: texture2 },
       uNoiseTexture: { value: this.noiseTexture },
       uResolution: { value: new THREE.Vector2(this.width, this.height) },
     };
@@ -126,7 +130,7 @@ export class LiquidSlider {
       }
     `;
 
-    const geometry = new THREE.PlaneGeometry(this.width, this.height, 1, 1);
+    const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight, 1, 1);
     const material = new THREE.ShaderMaterial({
       uniforms: this.uniforms,
       vertexShader,
@@ -147,8 +151,8 @@ export class LiquidSlider {
 
     gsap.to(this.uniforms.uProgress, {
       value: 1,
-      duration: 1,
-      ease: 'power2.inOut',
+      duration: 2.15,
+      ease: 'power3.out',
       onComplete: () => {
         this.currentIndex = index;
         this.uniforms.uTexture1.value = nextTexture;
@@ -157,9 +161,40 @@ export class LiquidSlider {
         const nextIndex = (this.currentIndex + 1) % this.textures.length;
         this.uniforms.uTexture2.value = this.textures[nextIndex];
 
+        this.updateMeshSize();
         this.isAnimating = false;
       },
     });
+  }
+
+  getCoverSize(texture) {
+    const imageAspect = texture.image.width / texture.image.height;
+    const screenAspect = this.width / this.height;
+
+    let planeWidth = this.width;
+    let planeHeight = this.height;
+
+    if (screenAspect > imageAspect) {
+      // 画面の方が横に広い → 横幅に合わせて高さ拡大（上下切れる）
+      planeWidth = this.width;
+      planeHeight = this.width / imageAspect;
+    } else {
+      // 画面の方が縦に長い → 高さに合わせて幅拡大（左右切れる）
+      planeHeight = this.height;
+      planeWidth = this.height * imageAspect;
+    }
+
+    return { planeWidth, planeHeight };
+  }
+
+  updateMeshSize() {
+    if (!this.mesh) return;
+
+    const texture = this.textures[this.currentIndex];
+    const { planeWidth, planeHeight } = this.getCoverSize(texture);
+
+    this.mesh.geometry.dispose();
+    this.mesh.geometry = new THREE.PlaneGeometry(planeWidth, planeHeight, 1, 1);
   }
 
   onResize() {
@@ -176,15 +211,7 @@ export class LiquidSlider {
       this.uniforms.uResolution.value.set(this.width, this.height);
     }
 
-    if (this.mesh) {
-      this.mesh.geometry.dispose();
-      this.mesh.geometry = new THREE.PlaneGeometry(
-        this.width,
-        this.height,
-        1,
-        1,
-      );
-    }
+    this.updateMeshSize();
   }
 
   render() {
